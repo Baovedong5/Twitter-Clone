@@ -7,10 +7,16 @@ import {
   loginValidator,
   registerValidator,
 } from "~/middlewares/users.middlewares";
+import { wrapRequestHandler } from "~/utils/handlers";
+import { validate } from "~/utils/validation";
 
 const userRouter = express.Router();
 
 userRouter.post("/login", loginValidator, loginController);
-userRouter.post("/register", registerValidator, registerController);
+userRouter.post(
+  "/register",
+  validate(registerValidator),
+  wrapRequestHandler(registerController)
+);
 
 export default userRouter;

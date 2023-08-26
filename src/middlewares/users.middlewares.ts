@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from "express";
-import { checkSchema } from "express-validator";
-import usersService from "~/services/users.services";
 
-import { validate } from "~/utils/validation";
+import { checkSchema } from "express-validator";
+import { usersMessage } from "~/constants/messages";
+import { ErrorWithStatus } from "~/models/Errors";
+import usersService from "~/services/users.services";
 
 export const loginValidator = (
   req: Request,
@@ -18,91 +19,109 @@ export const loginValidator = (
   next();
 };
 
-export const registerValidator = validate(
-  checkSchema({
-    name: {
-      notEmpty: true,
-      isString: true,
-      isLength: {
-        options: {
-          min: 1,
-          max: 100,
-        },
-      },
-      trim: true,
+export const registerValidator = checkSchema({
+  name: {
+    notEmpty: {
+      errorMessage: usersMessage.NAME_IS_REQUIRED,
     },
+    isString: {
+      errorMessage: usersMessage.NAME_MUST_BE_A_STRING,
+    },
+    isLength: {
+      options: {
+        min: 1,
+        max: 100,
+      },
+      errorMessage: usersMessage.NAME_LENGTH_MUST_BE_FROM_1_TO_100,
+    },
+    trim: true,
+  },
 
-    email: {
-      isEmail: true,
-      notEmpty: true,
-      trim: true,
-      custom: {
-        options: async (value) => {
-          const isExistEmail = await usersService.checkEmailExist(value);
-          if (isExistEmail) {
-            throw new Error("Email already exsits");
-          }
-          return true;
-        },
+  email: {
+    isEmail: {
+      errorMessage: usersMessage.EMAIL_IS_INVALID,
+    },
+    notEmpty: {
+      errorMessage: usersMessage.EMAIL_IS_REQUIRED,
+    },
+    trim: true,
+    custom: {
+      options: async (value) => {
+        const isExistEmail = await usersService.checkEmailExist(value);
+        if (isExistEmail) {
+          throw new Error(usersMessage.EMAIL_ALREADY_EXISTS);
+        }
+        return true;
       },
     },
-    password: {
-      notEmpty: true,
-      isString: true,
-      isLength: {
-        options: {
-          min: 6,
-          max: 50,
-        },
-      },
-      isStrongPassword: {
-        options: {
-          minLength: 6,
-          minLowercase: 1,
-          minUppercase: 1,
-          minSymbols: 1,
-        },
-        errorMessage: `Password must be at least 6 characters long and contain at least 1 
-          lowercase letter, 1 uppercase letter, 1 number, and 1 symbol`,
-      },
+  },
+  password: {
+    notEmpty: {
+      errorMessage: usersMessage.PASSOWRD_IS_REQUIRED,
     },
+    isString: {
+      errorMessage: usersMessage.PASSOWRD_MUST_BE_A_STRING,
+    },
+    isLength: {
+      options: {
+        min: 6,
+        max: 50,
+      },
+      errorMessage: usersMessage.PASSOWRD_LENGTH_MUST_BE_FROM_6_TO_50,
+    },
+    isStrongPassword: {
+      options: {
+        minLength: 6,
+        minLowercase: 1,
+        minUppercase: 1,
+        minSymbols: 1,
+      },
+      errorMessage: usersMessage.PASSOWRD_MUST_BE_STRONG,
+    },
+  },
 
-    confirm_password: {
-      notEmpty: true,
-      isString: true,
-      isLength: {
-        options: {
-          min: 6,
-          max: 50,
-        },
+  confirm_password: {
+    notEmpty: {
+      errorMessage: usersMessage.CONFIRM_PASSOWRD_IS_REQUIRED,
+    },
+    isString: {
+      errorMessage: usersMessage.CONFIRM_PASSOWRD_MUST_BE_A_STRING,
+    },
+    isLength: {
+      options: {
+        min: 6,
+        max: 50,
       },
-      isStrongPassword: {
-        options: {
-          minLength: 6,
-          minLowercase: 1,
-          minUppercase: 1,
-          minSymbols: 1,
-        },
-        errorMessage: `Password must be at least 6 characters long and contain at least 1 
-          lowercase letter, 1 uppercase letter, 1 number, and 1 symbol`,
+      errorMessage: usersMessage.CONFIRM_PASSOWRD_LENGTH_MUST_BE_FROM_6_TO_50,
+    },
+    isStrongPassword: {
+      options: {
+        minLength: 6,
+        minLowercase: 1,
+        minUppercase: 1,
+        minSymbols: 1,
       },
-      custom: {
-        options: (value, { req }) => {
-          if (value !== req.body.password) {
-            throw new Error("Password confirmation does not math password");
-          }
-          return true;
-        },
+      errorMessage: usersMessage.CONFIRM_PASSOWRD_MUST_BE_STRONG,
+    },
+    custom: {
+      options: (value, { req }) => {
+        if (value !== req.body.password) {
+          throw new Error(
+            usersMessage.CONFIRM_PASSOWRD_MUST_BE_THE_SAME_PASSWORD
+          );
+        }
+        return true;
       },
     },
+  },
 
-    date_of_birth: {
-      isISO8601: {
-        options: {
-          strict: true,
-          strictSeparator: true,
-        },
+  date_of_birth: {
+    isISO8601: {
+      options: {
+        strict: true,
+        strictSeparator: true,
       },
+      errorMessage: usersMessage.DATE_OF_BIRTH_MUST_BE_ISO8601,
     },
-  })
-);
+  },
+});
