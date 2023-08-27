@@ -12,7 +12,11 @@ import { validate } from "~/utils/validation";
 
 const userRouter = express.Router();
 
-userRouter.post("/login", loginValidator, loginController);
+userRouter.post(
+  "/login",
+  validate(loginValidator),
+  wrapRequestHandler(loginController)
+);
 userRouter.post(
   "/register",
   validate(registerValidator),
