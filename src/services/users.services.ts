@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { TokenType } from "~/constants/enum";
+import { usersMessage } from "~/constants/messages";
 import databaseService from "~/database/database";
 import { RegisterReqBody } from "~/models/requests/User.requests";
 import RefreshToken from "~/models/schemas/RefreshToken.schemas";
@@ -81,6 +82,13 @@ class UserService {
     return {
       access_token,
       refresh_token,
+    };
+  }
+
+  async logout(refresh_token: string) {
+    await databaseService.refreshTokens.deleteOne({ token: refresh_token });
+    return {
+      message: usersMessage.LOGOUT_SUCCESS,
     };
   }
 }
