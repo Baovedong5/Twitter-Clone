@@ -7,10 +7,13 @@ import { usersMessage } from "~/constants/messages";
 import databaseService from "~/database/database";
 
 import {
+  ForgotPasswordReqBody,
   LoginReqBody,
   LogoutReqBody,
   RegisterReqBody,
+  ResetPasswordReqBody,
   TokenPayload,
+  VefiryForgotPasswordReqBody,
   VerifyEmailReqBody,
 } from "~/models/requests/User.requests";
 import User from "~/models/schemas/User.schemas";
@@ -101,5 +104,38 @@ export const resendVerifyEmailController = async (
     });
   }
   const result = await usersService.resendVerifyEmail(user_id);
+  return res.json(result);
+};
+
+export const forgotPasswordController = async (
+  req: Request<ParamsDictionary, any, ForgotPasswordReqBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { _id } = req.user as User;
+  const result = await usersService.forgotPassword(
+    (_id as ObjectId).toString()
+  );
+  return res.json(result);
+};
+
+export const verifyForgotPasswordController = async (
+  req: Request<ParamsDictionary, any, VefiryForgotPasswordReqBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  return res.json({
+    message: usersMessage.VERIFY_FORGOT_PASSWORD_SUCCESS,
+  });
+};
+
+export const resetPasswordController = async (
+  req: Request<ParamsDictionary, any, ResetPasswordReqBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id } = req.decoded_forgot_password_token as TokenPayload;
+  const { password } = req.body;
+  const result = await usersService.resetPassword(user_id, password);
   return res.json(result);
 };

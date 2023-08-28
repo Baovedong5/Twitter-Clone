@@ -48,6 +48,19 @@ class UserService {
     });
   }
 
+  private signForgotPasswordToken(user_id: string) {
+    return signToken({
+      payload: {
+        user_id,
+        token_type: TokenType.ForotPasswordToken,
+      },
+      privateKey: process.env.JWT_SECRET_FORGOT_PASSWORD_TOKEN as string,
+      options: {
+        expiresIn: process.env.FORGOT_PASSWORD_TOKEN_EXPRIES,
+      },
+    });
+  }
+
   private signAccessAndRefreshToken(user_id: string) {
     return Promise.all([
       this.signAccessToken(user_id),
@@ -156,6 +169,43 @@ class UserService {
     );
     return {
       message: usersMessage.RESEND_VERIRY_EMAIL_SUCCESS,
+    };
+  }
+  async forgotPassword(user_id: string) {
+    const forgot_password_token = await this.signForgotPasswordToken(user_id);
+    await databaseService.users.updateOne(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: {
+          forgot_password_token,
+        },
+        $currentDate: {
+          updated_at: true,
+        },
+      }
+    );
+    //Gui email kem duong link den email nguoi dung https://twitter.com/forgot-password?token=token
+    console.log("forgot_password_token: ", forgot_password_token);
+    return {
+      message: usersMessage.CHECK_EMAIL_TO_RESET_PASSWORD,
+    };
+  }
+
+  async resetPassword(user_id: string, password: string) {
+    await databaseService.users.updateOne(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: {
+          forgot_password_token: "",
+          password: hashPassword(password),
+        },
+        $currentDate: {
+          updated_at: true,
+        },
+      }
+    );
+    return {
+      message: usersMessage.RESET_PASSWORD_SUCCESS,
     };
   }
 }

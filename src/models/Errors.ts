@@ -5,7 +5,6 @@ type TErrors = Record<
   string,
   {
     msg: string;
-
     [key: string]: any;
   }
 >;
