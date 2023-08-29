@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { ParamsDictionary } from "express-serve-static-core";
+import { pick } from "lodash";
 import { ObjectId } from "mongodb";
 import { UserVerifyStatus } from "~/constants/enum";
 import httpStatus from "~/constants/httpStatus";
@@ -13,6 +14,7 @@ import {
   RegisterReqBody,
   ResetPasswordReqBody,
   TokenPayload,
+  UpdateMeReqBody,
   VefiryForgotPasswordReqBody,
   VerifyEmailReqBody,
 } from "~/models/requests/User.requests";
@@ -25,7 +27,10 @@ export const loginController = async (
 ) => {
   const user = req.user as User;
   const user_id = user._id as ObjectId;
-  const result = await usersService.login(user_id.toString());
+  const result = await usersService.login({
+    user_id: user_id.toString(),
+    verify: user.verify,
+  });
   return res.status(200).json({
     message: usersMessage.LOGIN_SUCCESS,
     data: result,
@@ -112,10 +117,11 @@ export const forgotPasswordController = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { _id } = req.user as User;
-  const result = await usersService.forgotPassword(
-    (_id as ObjectId).toString()
-  );
+  const { _id, verify } = req.user as User;
+  const result = await usersService.forgotPassword({
+    user_id: (_id as ObjectId).toString(),
+    verify,
+  });
   return res.json(result);
 };
 
@@ -138,4 +144,35 @@ export const resetPasswordController = async (
   const { password } = req.body;
   const result = await usersService.resetPassword(user_id, password);
   return res.json(result);
+};
+
+export const getMeController = async (
+  req: Request<ParamsDictionary, any, ResetPasswordReqBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload;
+  const result = await usersService.getMe(user_id);
+  return res.json({
+    message: usersMessage.GET_ME_SUCCESS,
+    data: result,
+  });
+};
+
+export const updateMecontroller = async (
+  req: Request<ParamsDictionary, any, UpdateMeReqBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload;
+  const { body } = req;
+  console.log(">>>body: ", body);
+
+  const user = await usersService.updateMe(user_id, body);
+  console.log(">>> req.decoded_authorization: ", req.decoded_authorization);
+
+  return res.json({
+    message: usersMessage.UPDATE_ME_SUCCESS,
+    data: user,
+  });
 };
