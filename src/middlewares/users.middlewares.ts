@@ -1,3 +1,4 @@
+import { error } from "console";
 import { NextFunction, Request, Response } from "express";
 import { ParamSchema, checkSchema } from "express-validator";
 import { JsonWebTokenError } from "jsonwebtoken";
@@ -6,6 +7,7 @@ import { ObjectId } from "mongodb";
 import { UserVerifyStatus } from "~/constants/enum";
 import httpStatus from "~/constants/httpStatus";
 import { usersMessage } from "~/constants/messages";
+import { REGEX_USERNAME } from "~/constants/regex";
 import databaseService from "~/database/database";
 import { ErrorWithStatus } from "~/models/Errors";
 import { TokenPayload } from "~/models/requests/User.requests";
@@ -162,6 +164,29 @@ const dateOfBirthSchema: ParamSchema = {
       strictSeparator: true,
     },
     errorMessage: usersMessage.DATE_OF_BIRTH_MUST_BE_ISO8601,
+  },
+};
+
+const userIdSchema: ParamSchema = {
+  custom: {
+    options: async (value: string, { req }) => {
+      if (!ObjectId.isValid(value)) {
+        throw new ErrorWithStatus({
+          message: usersMessage.INVALID_USER_ID,
+          status: httpStatus.NOT_FOUND,
+        });
+      }
+      const follwed_user = await databaseService.users.findOne({
+        _id: new ObjectId(value),
+      });
+
+      if (follwed_user === null) {
+        throw new ErrorWithStatus({
+          message: usersMessage.USER_NOT_FOUND,
+          status: httpStatus.NOT_FOUND,
+        });
+      }
+    },
   },
 };
 
@@ -487,12 +512,20 @@ export const updateMeValidator = checkSchema(
         errorMessage: usersMessage.USERNAME_MUST_BE_STRING,
       },
       trim: true,
-      isLength: {
-        options: {
-          min: 1,
-          max: 50,
+      custom: {
+        options: async (value: string, { req }) => {
+          if (!REGEX_USERNAME.test(value)) {
+            throw Error(usersMessage.USERNAME_INVALID);
+          }
+          const user = await databaseService.users.findOne({
+            username: value,
+          });
+          // neu da ton tai username nay trong database
+          // thi chung ta khong cho update
+          if (user) {
+            throw Error(usersMessage.USERNAME_EXISTED);
+          }
         },
-        errorMessage: usersMessage.USERNAME_LENGTH,
       },
     },
 
@@ -501,4 +534,18 @@ export const updateMeValidator = checkSchema(
     cover_photo: imageSchema,
   },
   ["body"]
+);
+
+export const followValidator = checkSchema(
+  {
+    followed_user_id: userIdSchema,
+  },
+  ["body"]
+);
+
+export const unfollowValidator = checkSchema(
+  {
+    user_id: userIdSchema,
+  },
+  ["params"]
 );

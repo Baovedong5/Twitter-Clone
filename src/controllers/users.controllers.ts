@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import { ParamsDictionary } from "express-serve-static-core";
-import { pick } from "lodash";
 import { ObjectId } from "mongodb";
 import { UserVerifyStatus } from "~/constants/enum";
 import httpStatus from "~/constants/httpStatus";
@@ -8,12 +7,14 @@ import { usersMessage } from "~/constants/messages";
 import databaseService from "~/database/database";
 
 import {
+  FollowReqBody,
   ForgotPasswordReqBody,
   LoginReqBody,
   LogoutReqBody,
   RegisterReqBody,
   ResetPasswordReqBody,
   TokenPayload,
+  UnFollowReqParams,
   UpdateMeReqBody,
   VefiryForgotPasswordReqBody,
   VerifyEmailReqBody,
@@ -166,13 +167,38 @@ export const updateMecontroller = async (
 ) => {
   const { user_id } = req.decoded_authorization as TokenPayload;
   const { body } = req;
-  console.log(">>>body: ", body);
 
   const user = await usersService.updateMe(user_id, body);
-  console.log(">>> req.decoded_authorization: ", req.decoded_authorization);
 
   return res.json({
     message: usersMessage.UPDATE_ME_SUCCESS,
     data: user,
   });
+};
+
+export const followController = async (
+  req: Request<ParamsDictionary, any, FollowReqBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload;
+  const { followed_user_id } = req.body;
+
+  const result = await usersService.follow(user_id, followed_user_id);
+
+  return res.json(result);
+};
+
+export const unFollowController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload;
+
+  const { user_id: followed_user_id } = req.params;
+
+  const result = await usersService.unfollow(user_id, followed_user_id);
+
+  return res.json(result);
 };

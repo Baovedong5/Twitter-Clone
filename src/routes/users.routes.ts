@@ -1,6 +1,7 @@
 import express from "express";
 import {
   emailVerifyController,
+  followController,
   forgotPasswordController,
   getMeController,
   loginController,
@@ -8,6 +9,7 @@ import {
   registerController,
   resendVerifyEmailController,
   resetPasswordController,
+  unFollowController,
   updateMecontroller,
   verifyForgotPasswordController,
 } from "~/controllers/users.controllers";
@@ -15,11 +17,13 @@ import { filterMiddleware } from "~/middlewares/common.middlewares";
 import {
   accessTokenValidator,
   emailVerifyTokenValidator,
+  followValidator,
   forgotPasswordValidator,
   loginValidator,
   refreshTokenValidator,
   registerValidator,
   resetPasswordValidator,
+  unfollowValidator,
   updateMeValidator,
   verifiedUserValidator,
   verifyForgotPasswordTokenValidator,
@@ -100,6 +104,22 @@ userRouter.patch(
     "cover_photo",
   ]),
   wrapRequestHandler(updateMecontroller)
+);
+
+userRouter.post(
+  "/follow",
+  validate(accessTokenValidator),
+  verifiedUserValidator,
+  validate(followValidator),
+  wrapRequestHandler(followController)
+);
+
+userRouter.delete(
+  "/follow/:user_id",
+  validate(accessTokenValidator),
+  verifiedUserValidator,
+  validate(unfollowValidator),
+  wrapRequestHandler(unFollowController)
 );
 
 export default userRouter;
