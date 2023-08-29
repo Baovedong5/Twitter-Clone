@@ -85,4 +85,6 @@ export const usersMessage = {
   USERNAME_INVALID:
     "User name must be 4-15 charaters long containt only letters, number, underscores, not only number",
   USERNAME_EXISTED: "Usernamr existed",
+  OLD_PASSWORD_NOT_MATCH: "Old password not match",
+  CHANGE_PASSWORD_SUCCESS: "Change password success",
 } as const;

@@ -12,6 +12,7 @@ import databaseService from "~/database/database";
 import { ErrorWithStatus } from "~/models/Errors";
 import { TokenPayload } from "~/models/requests/User.requests";
 import usersService from "~/services/users.services";
+import { comparePassword, hashPassword } from "~/utils/bcrypt";
 import { verifyToken } from "~/utils/jwt";
 
 const passwordSchema: ParamSchema = {
@@ -548,4 +549,38 @@ export const unfollowValidator = checkSchema(
     user_id: userIdSchema,
   },
   ["params"]
+);
+
+export const changePasswordValidator = checkSchema(
+  {
+    old_password: {
+      ...passwordSchema,
+      custom: {
+        options: async (value: string, { req }) => {
+          const { user_id } = (req as Request)
+            .decoded_authorization as TokenPayload;
+          const user = await databaseService.users.findOne({
+            _id: new ObjectId(user_id),
+          });
+          if (!user) {
+            throw new ErrorWithStatus({
+              message: usersMessage.USER_NOT_FOUND,
+              status: httpStatus.NOT_FOUND,
+            });
+          }
+          const { password } = user;
+          const isMath = comparePassword(value, password);
+          if (!isMath) {
+            throw new ErrorWithStatus({
+              message: usersMessage.OLD_PASSWORD_NOT_MATCH,
+              status: httpStatus.UNAUTHOZIZED,
+            });
+          }
+        },
+      },
+    },
+    password: passwordSchema,
+    confirm_password: confirmPasswordSchema,
+  },
+  ["body"]
 );
