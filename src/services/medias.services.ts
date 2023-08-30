@@ -2,9 +2,11 @@ import { Request } from "express";
 import path from "path";
 import fs from "fs";
 import sharp from "sharp";
+import "dotenv/config";
 
 import { getNameFromFullname, handleUploadSingleImage } from "~/utils/file";
 import { UPLOAD_DIR } from "~/constants/dir";
+import { isProduction } from "~/constants/config";
 
 class MediasService {
   async handleUploadSingleImage(req: Request) {
@@ -13,7 +15,9 @@ class MediasService {
     const newPath = path.resolve(UPLOAD_DIR, `${newName}.jpg`);
     await sharp(file.filepath).jpeg().toFile(newPath);
     fs.unlinkSync(file.filepath);
-    return `http://localhost:8000/src/uploads/${newName}.jpg`;
+    return isProduction
+      ? `${process.env.HOST}/medias/${newName}.jpg`
+      : `http://localhost:${process.env.PORT}/medias/${newName}.jpg`;
   }
 }
 
