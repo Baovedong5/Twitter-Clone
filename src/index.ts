@@ -6,6 +6,8 @@ import databaseService from "./database/database";
 import { defaultErrorHandler } from "./middlewares/error.middlewares";
 import mediasRouter from "./routes/medias.routes";
 import { initFolder } from "./utils/file";
+import { UPLOAD_DIR } from "./constants/dir";
+import staticRouter from "./routes/static.routes";
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -16,6 +18,8 @@ initFolder();
 app.use(express.json());
 app.use("/users", userRouter);
 app.use("/medias", mediasRouter);
+app.use("/static", staticRouter);
+
 app.use(defaultErrorHandler);
 
 databaseService.connect();

@@ -87,4 +87,6 @@ export const usersMessage = {
   USERNAME_EXISTED: "Usernamr existed",
   OLD_PASSWORD_NOT_MATCH: "Old password not match",
   CHANGE_PASSWORD_SUCCESS: "Change password success",
+
+  UPLOAD_SUCCESS: "Upload success",
 } as const;
