@@ -7,6 +7,7 @@ import {
   getMeController,
   loginController,
   logoutController,
+  refreshTokenController,
   registerController,
   resendVerifyEmailController,
   resetPasswordController,
@@ -52,6 +53,12 @@ userRouter.post(
   validate(accessTokenValidator),
   validate(refreshTokenValidator),
   wrapRequestHandler(logoutController)
+);
+
+userRouter.post(
+  "/refresh-token",
+  validate(refreshTokenValidator),
+  wrapRequestHandler(refreshTokenController)
 );
 
 userRouter.post(

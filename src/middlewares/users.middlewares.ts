@@ -349,9 +349,9 @@ export const refreshTokenValidator = checkSchema(
             }
             (req as Request).decoded_refresh_token = decoded_refresh_token;
           } catch (error) {
-            if (error) {
+            if (error instanceof JsonWebTokenError) {
               throw new ErrorWithStatus({
-                message: (error as JsonWebTokenError).message,
+                message: error.message,
                 status: httpStatus.UNAUTHOZIZED,
               });
             }

@@ -89,4 +89,6 @@ export const usersMessage = {
   CHANGE_PASSWORD_SUCCESS: "Change password success",
 
   UPLOAD_SUCCESS: "Upload success",
+
+  REFRESH_TOKEN_SUCCESS: "Refresh token success",
 } as const;
