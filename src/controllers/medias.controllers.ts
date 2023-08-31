@@ -1,6 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import path from "path";
+import fs from "fs";
+import mime from "mime";
+
 import { UPLOAD_IMAGE_DIR, UPLOAD_VIDEO_TEMP_DIR } from "~/constants/dir";
+import httpStatus from "~/constants/httpStatus";
 import { usersMessage } from "~/constants/messages";
 import mediasService from "~/services/medias.services";
 
@@ -44,16 +48,37 @@ export const uploadVideoController = async (
   });
 };
 
-export const serverVideoController = (
+export const serverVideoStreamController = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
+  const range = req.headers.range;
+  if (!range) {
+    res.status(httpStatus.BAD_REQUEST).send("Requires range header");
+  }
   const { name } = req.params;
-
-  return res.sendFile(path.resolve(UPLOAD_VIDEO_TEMP_DIR, name), (err) => {
-    if (err) {
-      res.status((err as any).status).send("Not found");
-    }
-  });
+  const videoPath = path.resolve(UPLOAD_VIDEO_TEMP_DIR, name);
+  //1MB = 10^6 bytes (Tính theo hệ 10)
+  //Tính dung lượng video (bytes)
+  const videoSize = fs.statSync(videoPath).size;
+  //Dung lượng video cho mỗi phân đoạn stream
+  const chunkSize = 10 ** 6; //1MB
+  //Lấy giá trị byte bắt đầu từ header Range
+  const start = Number(range?.replace(/\D/g, ""));
+  //Lấy giá trị byte kết thúc, vượt quá dung lượng video thì lấy giá trị videoSize
+  const end = Math.min(start + chunkSize, videoSize - 1);
+  //Dung lượng thực tế cho mỗi đoạn video stream
+  //Thường sẽ là chunkSize, trừ đoạn cuối
+  const contentLength = end - start + 1;
+  const contentType = mime.getType(videoPath) || "video/*";
+  const headers = {
+    "Content-Range": `bytes ${start} - ${end}/${videoSize}`,
+    "Accept-Ranges": "bytes",
+    "Content-Length": contentLength,
+    "Content-Type": contentType,
+  };
+  res.writeHead(httpStatus.PARTIAL_CONTENT, headers);
+  const videoStream = fs.createReadStream(videoPath, { start, end });
+  videoStream.pipe(res);
 };

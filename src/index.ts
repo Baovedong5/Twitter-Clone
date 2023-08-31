@@ -6,7 +6,7 @@ import databaseService from "./database/database";
 import { defaultErrorHandler } from "./middlewares/error.middlewares";
 import mediasRouter from "./routes/medias.routes";
 import { initFolder } from "./utils/file";
-import { UPLOAD_IMAGE_DIR } from "./constants/dir";
+import { UPLOAD_IMAGE_DIR, UPLOAD_IMAGE_TEMP_DIR } from "./constants/dir";
 import staticRouter from "./routes/static.routes";
 
 const app = express();
@@ -19,6 +19,7 @@ app.use(express.json());
 app.use("/users", userRouter);
 app.use("/medias", mediasRouter);
 app.use("/static", staticRouter);
+app.use("/static/video", express.static(UPLOAD_IMAGE_TEMP_DIR));
 
 app.use(defaultErrorHandler);
 
