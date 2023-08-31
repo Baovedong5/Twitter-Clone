@@ -1,4 +1,3 @@
-import { error } from "console";
 import { NextFunction, Request, Response } from "express";
 import { ParamSchema, checkSchema } from "express-validator";
 import { JsonWebTokenError } from "jsonwebtoken";
@@ -12,7 +11,7 @@ import databaseService from "~/database/database";
 import { ErrorWithStatus } from "~/models/Errors";
 import { TokenPayload } from "~/models/requests/User.requests";
 import usersService from "~/services/users.services";
-import { comparePassword, hashPassword } from "~/utils/bcrypt";
+import { comparePassword } from "~/utils/bcrypt";
 import { verifyToken } from "~/utils/jwt";
 
 const passwordSchema: ParamSchema = {
@@ -207,6 +206,15 @@ export const loginValidator = checkSchema(
           if (user === null) {
             throw new Error(usersMessage.EMAIL_OR_PASSWORD_IS_INCORRECT);
           }
+
+          const isPasswordMatch = comparePassword(
+            req.body.password,
+            user.password
+          );
+          if (!isPasswordMatch) {
+            throw new Error(usersMessage.EMAIL_OR_PASSWORD_IS_INCORRECT);
+          }
+
           req.user = user;
 
           return true;

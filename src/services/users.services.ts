@@ -153,7 +153,7 @@ class UserService {
   }) {
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken({
       user_id: user_id.toString(),
-      verify: UserVerifyStatus.Unverified,
+      verify,
     });
     await databaseService.refreshTokens.insertOne(
       new RefreshToken({
