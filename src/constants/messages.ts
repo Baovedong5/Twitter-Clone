@@ -91,4 +91,6 @@ export const usersMessage = {
   UPLOAD_SUCCESS: "Upload success",
 
   REFRESH_TOKEN_SUCCESS: "Refresh token success",
+
+  GET_VIDEO_STATUS_SUCCESS: "Get video status success",
 } as const;

@@ -3,6 +3,7 @@ import {
   uploadImageController,
   uploadVideoController,
   uploadVideoHLSController,
+  videoStatusController,
 } from "~/controllers/medias.controllers";
 import {
   accessTokenValidator,
@@ -32,6 +33,13 @@ mediasRouter.post(
   validate(accessTokenValidator),
   verifiedUserValidator,
   wrapRequestHandler(uploadVideoHLSController)
+);
+
+mediasRouter.get(
+  "/video-status/:id",
+  validate(accessTokenValidator),
+  verifiedUserValidator,
+  wrapRequestHandler(videoStatusController)
 );
 
 export default mediasRouter;

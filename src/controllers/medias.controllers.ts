@@ -118,11 +118,24 @@ export const severSegmentController = (
   next: NextFunction
 ) => {
   const { id, v, segment } = req.params;
-  console.log(">>> segment", segment);
 
   return res.sendFile(path.resolve(UPLOAD_VIDEO_DIR, id, v, segment), (err) => {
     if (err) {
       res.status((err as any).status).send("Not Found");
     }
+  });
+};
+
+export const videoStatusController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { id } = req.params;
+  const result = await mediasService.getVideoStatus(id as string);
+
+  return res.json({
+    message: usersMessage.GET_VIDEO_STATUS_SUCCESS,
+    data: result,
   });
 };
