@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 import mime from "mime";
 
-import { UPLOAD_IMAGE_DIR, UPLOAD_VIDEO_TEMP_DIR } from "~/constants/dir";
+import { UPLOAD_IMAGE_DIR, UPLOAD_VIDEO_DIR } from "~/constants/dir";
 import httpStatus from "~/constants/httpStatus";
 import { usersMessage } from "~/constants/messages";
 import mediasService from "~/services/medias.services";
@@ -58,7 +58,7 @@ export const serverVideoStreamController = (
     res.status(httpStatus.BAD_REQUEST).send("Requires range header");
   }
   const { name } = req.params;
-  const videoPath = path.resolve(UPLOAD_VIDEO_TEMP_DIR, name);
+  const videoPath = path.resolve(UPLOAD_VIDEO_DIR, name);
   //1MB = 10^6 bytes (Tính theo hệ 10)
   //Tính dung lượng video (bytes)
   const videoSize = fs.statSync(videoPath).size;
@@ -81,4 +81,48 @@ export const serverVideoStreamController = (
   res.writeHead(httpStatus.PARTIAL_CONTENT, headers);
   const videoStream = fs.createReadStream(videoPath, { start, end });
   videoStream.pipe(res);
+};
+
+export const uploadVideoHLSController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const url = await mediasService.uploadVideoHLS(req);
+
+  return res.json({
+    message: usersMessage.UPLOAD_SUCCESS,
+    data: url,
+  });
+};
+
+export const severM3U8Controller = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { id } = req.params;
+  return res.sendFile(
+    path.resolve(UPLOAD_VIDEO_DIR, id, "master.m3u8"),
+    (err) => {
+      if (err) {
+        res.status((err as any).status).send("Not Found");
+      }
+    }
+  );
+};
+
+export const severSegmentController = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { id, v, segment } = req.params;
+  console.log(">>> segment", segment);
+
+  return res.sendFile(path.resolve(UPLOAD_VIDEO_DIR, id, v, segment), (err) => {
+    if (err) {
+      res.status((err as any).status).send("Not Found");
+    }
+  });
 };

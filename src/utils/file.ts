@@ -1,8 +1,14 @@
 import { Request } from "express";
 import fs from "fs";
 import formidable, { File } from "formidable";
+import { v4 as uuidv4 } from "uuid";
 
-import { UPLOAD_IMAGE_TEMP_DIR, UPLOAD_VIDEO_TEMP_DIR } from "~/constants/dir";
+import {
+  UPLOAD_IMAGE_TEMP_DIR,
+  UPLOAD_VIDEO_TEMP_DIR,
+  UPLOAD_VIDEO_DIR,
+} from "~/constants/dir";
+import path from "path";
 
 export const initFolder = () => {
   [UPLOAD_IMAGE_TEMP_DIR, UPLOAD_VIDEO_TEMP_DIR].forEach((dir) => {
@@ -50,10 +56,13 @@ export const getNameFromFullname = (fullname: string) => {
 };
 
 export const handleUploadVideo = async (req: Request) => {
-  const form = formidable({
-    uploadDir: UPLOAD_VIDEO_TEMP_DIR,
-    maxFiles: 1,
+  const idName = uuidv4();
+  const folderPath = path.resolve(UPLOAD_VIDEO_DIR, idName);
+  fs.mkdirSync(folderPath);
 
+  const form = formidable({
+    uploadDir: folderPath,
+    maxFiles: 1,
     maxFileSize: 50 * 1024 * 1024, // 50MB
 
     filter: function ({ name, originalFilename, mimetype }) {
@@ -64,6 +73,10 @@ export const handleUploadVideo = async (req: Request) => {
         form.emit("error" as any, new Error("File type is not valid") as any);
       }
       return valid;
+    },
+
+    filename: function () {
+      return idName;
     },
   });
 
@@ -80,6 +93,7 @@ export const handleUploadVideo = async (req: Request) => {
         const ext = getExtension(video.originalFilename as string);
         fs.renameSync(video.filepath, video.filepath + "." + ext);
         video.newFilename = video.newFilename + "." + ext;
+        video.filepath = video.filepath + "." + ext;
       });
       resolve(files.video as File[]);
     });
