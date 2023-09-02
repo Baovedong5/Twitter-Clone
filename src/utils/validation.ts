@@ -21,7 +21,6 @@ export const validate = (
     }
 
     const errorsObject = errors.mapped();
-
     const entityErros = new EntityError({ errors: {} });
 
     for (const key in errorsObject) {
