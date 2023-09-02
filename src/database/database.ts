@@ -5,6 +5,8 @@ import RefreshToken from "~/models/schemas/RefreshToken.schemas";
 import Follower from "~/models/schemas/Follower.schemas";
 import VideoStatus from "~/models/schemas/VideoStatus.schemas";
 import Tweet from "~/models/schemas/Tweet.schemas";
+import Hashtag from "~/models/schemas/Hashtag.schemas";
+import Bookmark from "~/models/schemas/Bookmark.schemas";
 
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.wqrn7k4.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -47,6 +49,14 @@ class DatabaseService {
 
   get tweets(): Collection<Tweet> {
     return this.db.collection("tweets");
+  }
+
+  get hashtags(): Collection<Hashtag> {
+    return this.db.collection("hashtags");
+  }
+
+  get bookmarks(): Collection<Bookmark> {
+    return this.db.collection("bookmarks");
   }
 }
 

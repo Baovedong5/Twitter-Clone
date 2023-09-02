@@ -107,3 +107,8 @@ export const TWEETS_MESSAGE = {
   MEDIAS_MUST_BE_AN_ARRAY_OF_MEDIA_OBJECT:
     "Medias must be an array of media object",
 } as const;
+
+export const COMMENT_MESSAGE = {
+  BOOKMARK_SUCCESSFULLY: "Bookmark successfully",
+  UNBOOKMARK_SUCCESSFULLY: "Unbookmark successfully",
+} as const;

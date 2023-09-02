@@ -9,6 +9,7 @@ import mediasRouter from "./routes/medias.routes";
 import { initFolder } from "./utils/file";
 import staticRouter from "./routes/static.routes";
 import tweetRouter from "./routes/tweets.routes";
+import bookmarksRouter from "./routes/bookmarks.routes";
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -24,6 +25,7 @@ app.use("/users", userRouter);
 app.use("/medias", mediasRouter);
 app.use("/static", staticRouter);
 app.use("/tweets", tweetRouter);
+app.use("/bookmarks", bookmarksRouter);
 
 app.use(defaultErrorHandler);
 
