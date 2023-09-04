@@ -486,7 +486,7 @@ class TweetsService {
         tweet.user_views += 1;
       });
     return {
-      total: total[0].total,
+      total: total[0]?.total || 0,
       tweets,
     };
   }

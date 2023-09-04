@@ -17,6 +17,11 @@ export enum MediaType {
   HLS,
 }
 
+export enum MediaTypeQuery {
+  Image = "Image",
+  VIdeo = "Video",
+}
+
 export enum EncodingStatus {
   Pending, //Dang cho o hang doi
   Processing, // Dang endcode
@@ -34,4 +39,9 @@ export enum TweetType {
 export enum TweetAudience {
   Everyone,
   TwitterCircle,
+}
+
+export enum PeopleFollow {
+  Anyone = "0",
+  Following = "1",
 }

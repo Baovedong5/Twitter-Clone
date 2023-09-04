@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   bookmarkTweetController,
   unBookmarkTweetController,
-} from "~/middlewares/bookmarks.controller";
+} from "~/controllers/bookmarks.controller";
 import { tweetIdValidator } from "~/middlewares/tweets.middlewares";
 
 import {
