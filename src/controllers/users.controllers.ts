@@ -167,7 +167,7 @@ export const resetPasswordController = async (
 };
 
 export const getMeController = async (
-  req: Request<ParamsDictionary, any, ResetPasswordReqBody>,
+  req: Request<ParamsDictionary, any, any>,
   res: Response,
   next: NextFunction
 ) => {
@@ -231,4 +231,17 @@ export const changePasswordController = async (
   const { password } = req.body;
   const result = await usersService.changePassword(user_id, password);
   return res.json(result);
+};
+
+export const getProfileController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const username = req.params.username;
+  const result = await usersService.getProfile(username);
+  return res.json({
+    message: "Get Profile successfully",
+    data: result,
+  });
 };

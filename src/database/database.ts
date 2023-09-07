@@ -7,6 +7,7 @@ import VideoStatus from "~/models/schemas/VideoStatus.schemas";
 import Tweet from "~/models/schemas/Tweet.schemas";
 import Hashtag from "~/models/schemas/Hashtag.schemas";
 import Bookmark from "~/models/schemas/Bookmark.schemas";
+import Conversation from "~/models/schemas/Conversations.schema";
 
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.wqrn7k4.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -57,6 +58,10 @@ class DatabaseService {
 
   get bookmarks(): Collection<Bookmark> {
     return this.db.collection("bookmarks");
+  }
+
+  get conversations(): Collection<Conversation> {
+    return this.db.collection("conversations");
   }
 }
 

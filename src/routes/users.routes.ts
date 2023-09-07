@@ -5,6 +5,7 @@ import {
   followController,
   forgotPasswordController,
   getMeController,
+  getProfileController,
   loginController,
   logoutController,
   refreshTokenController,
@@ -138,5 +139,7 @@ userRouter.put(
   validate(changePasswordValidator),
   wrapRequestHandler(changePasswordController)
 );
+
+userRouter.get("/:username", wrapRequestHandler(getProfileController));
 
 export default userRouter;
